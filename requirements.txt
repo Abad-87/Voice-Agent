@@ -6,3 +6,4 @@ numpy
 wavio
 faster-whisper
 piper-tts
+uvicorn[standard]
