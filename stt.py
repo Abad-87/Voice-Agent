@@ -1,6 +1,3 @@
-import sounddevice as sd
-import numpy as np
-import wavio
 from faster_whisper import WhisperModel
 
 SAMPLE_RATE = 16000
@@ -13,6 +10,9 @@ model = WhisperModel(
 )
 
 def record_audio(duration=5, filename="temp.wav"):
+    import sounddevice as sd
+    import numpy as np
+    import wavio
     print("🎤 Recording...")
     audio = sd.rec(
         int(duration * SAMPLE_RATE),

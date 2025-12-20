@@ -1,10 +1,10 @@
 from piper import PiperVoice
-import sounddevice as sd
 
 voice = PiperVoice.load("en_US-lessac-medium.onnx")
 
 def text_to_speech(text: str):
     try:
+        import sounddevice as sd
         audio, sample_rate = voice.synthesize(text)
 
         sd.play(audio, sample_rate)
