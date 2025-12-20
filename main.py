@@ -1,14 +1,15 @@
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 import shutil
 import requests
+import os
 
 from stt import speech_to_text
 from tts import text_to_speech
 from auth import verify_key
 
-app = FastAPI(title="Local Voice AI")
+app = FastAPI(title="Voice AI")
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 
 @app.post("/voice-chat")
