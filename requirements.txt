@@ -7,3 +7,16 @@ wavio
 faster-whisper
 piper-tts
 uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+redis
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+twilio
+python-dotenv
+pytest
+pytest-asyncio

@@ -1,13 +1,24 @@
-from faster_whisper import WhisperModel
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SAMPLE_RATE = 16000
 
-# CPU + low RAM optimized
-model = WhisperModel(
-    "tiny",
-    device="cpu",
-    compute_type="int8"
-)
+# Check if STT libraries are available
+try:
+    from faster_whisper import WhisperModel
+    # CPU + low RAM optimized
+    model = WhisperModel(
+        "tiny",
+        device="cpu",
+        compute_type="int8"
+    )
+    WHISPER_AVAILABLE = True
+except ImportError:
+    WHISPER_AVAILABLE = False
+    print("Faster Whisper not available - using mock STT")
+    model = None
 
 def record_audio(duration=5, filename="temp.wav"):
     import sounddevice as sd
