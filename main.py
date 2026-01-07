@@ -12,6 +12,11 @@ app = FastAPI(title="Voice AI")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
 @app.post("/voice-chat")
 def voice_chat(
     x_api_key: str = Header(...),
