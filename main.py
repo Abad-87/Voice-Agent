@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException
+from fastapi.responses import Response
 import shutil
 import requests
 import os
@@ -18,7 +19,7 @@ def health_check():
 
 
 @app.post("/voice-chat")
-def voice_chat(
+async def voice_chat(
     x_api_key: str = Header(...),
     audio_file: UploadFile = File(...)
 ):
@@ -27,19 +28,22 @@ def voice_chat(
         raise HTTPException(status_code=403, detail="Invalid API key")
 
     # 💾 Save uploaded audio
-    audio_path = f"temp_{audio_file.filename}"
+    audio_path = f"/tmp/{audio_file.filename}"
     with open(audio_path, "wb") as f:
         shutil.copyfileobj(audio_file.file, f)
 
     # 🎤 Speech → Text
     user_text = speech_to_text(audio_path)
 
+    if not user_text:
+        raise HTTPException(status_code=400, detail="Could not transcribe audio")
+
     # 🤖 Text → LLM
     response = requests.post(
-    OLLAMA_URL,
-    json={
-        "model": "phi",
-        "prompt": f"""
+        OLLAMA_URL,
+        json={
+            "model": "phi",
+            "prompt": f"""
 You are a helpful and responsible AI assistant.
 
 Health rules:
@@ -50,21 +54,24 @@ Health rules:
 
 User: {user_text}
 """,
-        "stream": False
-    },
-    timeout=120
-)
-
+            "stream": False
+        },
+        timeout=120
+    )
 
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="LLM failed")
 
     ai_reply = response.json()["response"]
 
-    # 🔊 Text → Speech (THIS is where it belongs)
-    text_to_speech(ai_reply)
+    # 🔊 Text → Speech (generate audio bytes)
+    audio_bytes = await text_to_speech(ai_reply)
 
-    return {
-        "you_said": user_text,
-        "ai_reply": ai_reply
-    }
+    if not audio_bytes:
+        raise HTTPException(status_code=500, detail="TTS failed")
+
+    # 🎧 Return AUDIO, not JSON
+    return Response(
+        content=audio_bytes,
+        media_type="audio/wav"
+    )
